@@ -1,0 +1,817 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 4.1: Aprendizaje no supervisado} 
+\subtitle{Auto-encoders}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+
+\begin{frame}[t]
+  \frametitle{Introducción}
+  \framesubtitle{Aprendizaje no supervisado}
+  \begin{block}{}
+    Hasta ahora hemos estado hablando siempre de \textbf{aprendizaje profundo supervisado}, pero también podemos resolver problemas \textbf{no supervisados}.
+  \end{block}
+  \vspace{.3cm}
+  \textbf{Objetivo:}
+  \begin{itemize}
+    \item Extraer patrones directamente de los datos ``sin etiquetar'', solo tenemos $x$ y no $y$.
+  \end{itemize}
+  \vspace{.3cm}
+  \textbf{Tareas comunes:}
+  \begin{itemize}
+    \item Codificar y ``comprimir'' $x$ en un espacio de menor dimensión.
+    \item Entender la distribución de $x$ y generar nuevas muestras.
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Introducción}
+%   \framesubtitle{Aprendizaje no supervisado}
+%   \includegraphics[width=.15\textwidth, center]{imgs/tema4/aenc/hinton.jpg}\\
+%   \vspace{.5cm}
+%   \emph{The brain has about $10^{14}$ synapses and we only live for about $10^9$ seconds. So we have a lot more parameters than data. This motivates the idea that we must do a lot of \textbf{unsupervised learning} since the perceptual input (including proprioception) is the only place we can get $10^5$ dimensions of constraint per second.}\\
+%   \vspace{.2cm}
+%   \hfill Geoffrey Hinton, 2014
+% \end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Introducción}
+%   \framesubtitle{Aprendizaje no supervisado}
+
+%   \begin{columns}
+%     \begin{column}{0.4\textwidth}
+%       \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/lecun.jpg}\\
+%       \vspace{.5cm}
+%       \emph{We need tremendous amount of information to build machines that have common sense and generalize.}\\
+%       \vspace{.2cm}
+%       \hfill Yann LeCun, 2016
+%     \end{column}
+%     \begin{column}{0.6\textwidth}
+%       \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/cake.png}\\
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+% \begin{frame}[t]
+%   \frametitle{Introducción}
+%   \framesubtitle{Modelos generativos}
+%   \begin{block}{}
+%     Un \textbf{modelo generativo} es un modelo probabilístico $p$ que puede ser utilizado como un ``simulador de datos''.
+%   \end{block}
+%   \vspace{.3cm}
+%   Su propósito es generar datos sintéticos pero realistas de alta dimensión
+%   $$\mathbf{x} \sim p_{\theta}(\mathbf{x}),$$
+%   que se asemejen lo más posible a la distribución desconocida de datos $p(\mathbf{x})$.
+% \end{frame}
+
+% \begin{frame}[t]
+%   \frametitle{Introducción}
+%   \framesubtitle{Modelos generativos}
+%   \begin{figure}
+%     \includegraphics[width=\textwidth, center]{imgs/tema4/aenc/moore_gm.jpg}
+%     \caption{Ley de Moore de los modelos generativos de imágenes}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[t]
+%   \frametitle{Introducción}
+%   \framesubtitle{Modelos generativos}
+%   Algunas aplicaciones:
+%   \begin{figure}
+%     \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/why-gm.png}
+%     \caption{Los modelos generativos tienen un rol muy importante en muchos problemas actuales}
+%   \end{figure}
+% \end{frame}
+
+\section{Auto-encoders}
+
+% \begin{frame}[c]
+%   \frametitle{Auto-encoders}
+%   \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/enc_a.pdf}\\
+% \end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Auto-encoders}
+%   \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/enc_b.pdf}\\
+% \end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Auto-encoders}
+%   \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/enc_c.pdf}\\
+% \end{frame}
+
+\begin{frame}[c]
+  \frametitle{Auto-encoders}
+  \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/enc_d.pdf}\\
+\end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Auto-encoders}
+%   \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/dec_a.pdf}\\
+% \end{frame}
+
+\begin{frame}[c]
+  \frametitle{Auto-encoders}
+  \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/dec_b.pdf}\\
+\end{frame}
+
+% \begin{frame}[c]
+%   \frametitle{Auto-encoders}
+%   \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/dec_c.pdf}\\
+% \end{frame}
+
+\begin{frame}[t]
+  \frametitle{Auto-encoders}
+  Un \textbf{auto-encoder} es una función compuesta a partir de:
+  \begin{itemize}
+    \item Un \textbf{encoder} $f$ que proyecta del espacio original $\mathcal{X}$ al espacio latente $\mathcal{Z}$.
+    \item Un \textbf{decoder} $g$ que proyecta de vuelta al espacio original.
+  \end{itemize} 
+
+  \begin{block}{}
+    El objetivo es que $g \circ f$, es decir, que la composición de funciones se aproxime lo máximo posible a los datos originales o función identidad.
+  \end{block}
+  \vspace{.3cm}
+  \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/aenc_3.pdf}\\
+
+\end{frame}
+
+
+\begin{frame}[t]\frametitle{Auto-encoders}
+  Siendo $p(\mathbf{x})$ la distribución de los datos en $\mathcal{X}$, un buen auto-encoder puede caracterizarse con la \emph{reconstruction loss}:
+  $$\mathbb{E}_{\mathbf{x} \sim p(\mathbf{x})} \left[ || \mathbf{x} - g \circ f(\mathbf{x}) ||^2 \right] \approx 0.$$
+
+  \begin{block}{}
+    Esta función de pérdida mide como de bien el auto-encoder puede reconstruir los datos originales.
+  \end{block}
+
+  Dadas dos funciones de proyección con parámetros $f(\cdot; \theta_f)$ and $g(\cdot;\theta_g)$, el entrenamiento consiste aprender los parámetros que minimicen dicha loss:
+  $$\theta_f, \theta_g = \arg \min_{\theta_f, \theta_g} \frac{1}{N} \sum_{i=1}^N || \mathbf{x}_i - g(f(\mathbf{x}_i,\theta_f), \theta_g) ||^2.$$
+
+\end{frame}
+
+% \begin{frame}[t]\frametitle{Auto-encoders}\framesubtitle{Ejemplo}
+%   Imaginemos, por ejemplo, un auto-encoder lineal con
+%   $$
+%   \begin{aligned}
+%     f: \mathbf{z} &= \mathbf{U}^T \mathbf{x} \\
+%     g: \hat{\mathbf{x}} &= \mathbf{U} \mathbf{z},
+%   \end{aligned}
+%   $$
+%   con $\mathbf{U} \in \mathbb{R}^{p\times d}$, el \emph{reconstruction loss} se reduce a
+%   $$\mathbb{E}_{\mathbf{x} \sim p(\mathbf{x})} \left[ || \mathbf{x} - \mathbf{U}\mathbf{U}^T \mathbf{x} ||^2 \right].$$
+%   %En este caso, el PCA nos daría una solución óptima.
+% \end{frame}
+
+% \subsection{Deep Auto-encoders}
+
+\begin{frame}[t]\frametitle{Deep Auto-encoders}
+  \begin{blockm}{Mayor profundidad}
+    Para obtener mejores resultados, en vez de proyecciones lineales se suelen utilizar redes neuronales profundas en $f$ y $g$.
+  \end{blockm}
+  Algunos ejemplos:
+  \begin{itemize}
+    \item Combinando un MLP encoder $f : \mathbb{R}^p \to \mathbb{R}^d$ con un MLP decoder $g: \mathbb{R}^d \to \mathbb{R}^p$.
+    \item Combinando un convolutional network encoder $f : \mathbb{R}^{w\times h \times c} \to \mathbb{R}^d$ con un decoder decoder $g : \mathbb{R}^d \to \mathbb{R}^{w\times h \times c}$ compuesto de capas convolucionales reciprocas.
+  \end{itemize}
+  \vspace{.3cm}
+  \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/deep_aenc.pdf}\\
+\end{frame}
+
+\begin{frame}[c]\frametitle{Deep Auto-encoders}\framesubtitle{Ejemplo MNIST}
+  \vspace{-.2cm}
+  \begin{center}
+    Datos originales $\mathbf{x}$ con $d=784$ (28x28).\\
+    \vspace{.2cm}
+    \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_or.pdf}\\
+    \vspace{.5cm}
+    Resultado de auto-encoder $g \circ f$ creado a partir de CNN con $d=2$.\\
+    \vspace{.2cm}
+    \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_cnn_2.pdf}\\ 
+    % \vspace{.2cm}
+    % Resultado de auto-encoder $g \circ f$ creado a partir de PCA con $d=2$.\\
+    % \vspace{.2cm}
+    % \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_pca_2.pdf}\\
+  \end{center}    
+\end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales $\mathbf{x}$ con $d=784$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_or.pdf}\\
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de CNN con $d=4$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_cnn_4.pdf}\\ 
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de PCA con $d=4$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_pca_4.pdf}\\
+%   \end{center}    
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales $\mathbf{x}$ con $d=784$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_or.pdf}\\
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de CNN con $d=8$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_cnn_8.pdf}\\ 
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de PCA con $d=8$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_pca_8.pdf}\\
+%   \end{center}    
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales $\mathbf{x}$ con $d=784$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_or.pdf}\\
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de CNN con $d=16$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_cnn_16.pdf}\\ 
+%     \vspace{.2cm}
+%     Resultado de auto-encoder $g \circ f$ creado a partir de PCA con $d=16$.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_pca_16.pdf}\\
+%   \end{center}    
+% \end{frame}
+
+\begin{frame}[c]\frametitle{Deep Auto-encoders}\framesubtitle{Ejemplo MNIST}
+  \vspace{-.2cm}
+  \begin{center}
+    Datos originales $\mathbf{x}$ con $d=784$ (28x28).\\
+    \vspace{.2cm}
+    \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_or.pdf}\\
+    \vspace{.5cm}
+    Resultado de auto-encoder $g \circ f$ creado a partir de CNN con $d=32$.\\
+    \vspace{.2cm}
+    \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_cnn_32.pdf}\\ 
+    % \vspace{.2cm}
+    % Resultado de auto-encoder $g \circ f$ creado a partir de PCA con $d=32$.\\
+    % \vspace{.2cm}
+    % \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/ex_pca_32.pdf}\\
+  \end{center}    
+\end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+%   \begin{blockm}{Interpolar puntos}
+%     Para comprender la representación latente aprendida, podemos elegir dos muestras $\mathbf{x}$ y $\mathbf{x}'$ al azar e interpolar muestras a lo largo de la línea en el espacio latente.
+%   \end{blockm}  
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/interpol.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+%   \begin{blockm}{Interpolar puntos}
+%     Para comprender la representación latente aprendida, podemos elegir dos muestras $\mathbf{x}$ y $\mathbf{x}'$ al azar e interpolar muestras a lo largo de la línea en el espacio latente.
+%   \end{blockm}  
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/interpol_a.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+%   \begin{blockm}{Interpolar puntos}
+%     Para comprender la representación latente aprendida, podemos elegir dos muestras $\mathbf{x}$ y $\mathbf{x}'$ al azar e interpolar muestras a lo largo de la línea en el espacio latente.
+%   \end{blockm}  
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/interpol_b.pdf}\\
+% \end{frame}
+
+\begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+  \begin{blockm}{Interpolar puntos}
+    Para comprender la representación latente aprendida, podemos elegir dos muestras $\mathbf{x}$ y $\mathbf{x}'$ al azar e interpolar muestras a lo largo de la línea en el espacio latente.
+  \end{blockm}  
+  \vspace{.3cm}
+  \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/interpol_c.pdf}\\
+\end{frame}
+
+% \begin{frame}[c]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+%   \begin{center}
+%     \textbf{Interpolación de PCA ($d=32$).}\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.45\textwidth, center]{imgs/tema4/aenc/pca_interpol.pdf}\\    
+%   \end{center}
+% \end{frame}
+
+\begin{frame}[c]\frametitle{Deep Auto-encoders}\framesubtitle{Interpolación}
+  \begin{center}
+    \textbf{Interpolación de Auto-encoder ($d=32$).}\\
+    \vspace{.2cm}
+    \includegraphics[width=.45\textwidth, center]{imgs/tema4/aenc/aenc_interpol.pdf}\\    
+  \end{center}
+\end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}
+%   \begin{block}{\textbf{Generar nuevos datos}}
+%     Además de generar valores intermedios entre dos datos existentes, también podemos utilizar el decoder para obtener la representación en $\mathcal{X}$ de valores desconocidos en $\mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   Se introduce un modelo de densidad $q$ en $\mathcal{Z}$ y se utiliza $g$ para mapear en $\mathcal{X}$.\\
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/decoder_smp_a.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}
+%   \begin{block}{\textbf{Generar nuevos datos}}
+%     Además de generar valores intermedios entre dos datos existentes, también podemos utilizar el decoder para obtener la representación en $\mathcal{X}$ de valores desconocidos en $\mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   Se introduce un modelo de densidad $q$ en $\mathcal{Z}$ y se utiliza $g$ para mapear en $\mathcal{X}$.\\
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/decoder_smp_b.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}
+%   \begin{block}{\textbf{Generar nuevos datos}}
+%     Además de generar valores intermedios entre dos datos existentes, también podemos utilizar el decoder para obtener la representación en $\mathcal{X}$ de valores desconocidos en $\mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   Se introduce un modelo de densidad $q$ en $\mathcal{Z}$ y se utiliza $g$ para mapear en $\mathcal{X}$.\\
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/decoder_smp_c.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}
+%   \begin{block}{\textbf{Generar nuevos datos}}
+%     Además de generar valores intermedios entre dos datos existentes, también podemos utilizar el decoder para obtener la representación en $\mathcal{X}$ de valores desconocidos en $\mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   Se introduce un modelo de densidad $q$ en $\mathcal{Z}$ y se utiliza $g$ para mapear en $\mathcal{X}$.\\
+%   \vspace{.3cm}
+%   \includegraphics[width=.78\textwidth, center]{imgs/tema4/aenc/decoder_smp_d.pdf}\\
+% \end{frame}
+
+\begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}
+  \begin{block}{\textbf{Generar nuevos datos}}
+    Además de generar valores intermedios entre dos datos existentes, también podemos utilizar el decoder para obtener la representación en $\mathcal{X}$ de valores desconocidos en $\mathcal{Z}$.
+  \end{block}
+  \vspace{.2cm}
+  Se introduce un modelo de densidad $q$ en $\mathcal{Z}$ y se utiliza $g$ para mapear en $\mathcal{X}$.\\
+  \vspace{.3cm}
+  \includegraphics[width=.6\textwidth, center]{imgs/tema4/aenc/vae_motivation.pdf}\\
+\end{frame}
+
+% \begin{frame}[t]\frametitle{Deep Auto-encoders}\framesubtitle{Generación}\label{frame:gen}
+%   Por ejemplo, si utilizamos una distribución gaussiana $q(\mathbf{z}) = \mathcal{N}(\hat{\mu}, \hat{\Sigma}),$ donde $\hat{\mu}$ y $\hat{\Sigma}$ se estiman a partir de los datos de entrenamiento:
+%   \vspace{.2cm}
+%   \begin{center}
+%     Generación de datos con auto-encoder ($d=16$).\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.3\textwidth, center]{imgs/tema4/aenc/decoder_mnist_16.pdf}\\
+%     \vspace{.2cm}
+%     Generación de datos con auto-encoder ($d=32$).\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.3\textwidth, center]{imgs/tema4/aenc/decoder_mnist_32.pdf}\\ 
+%   \end{center}  
+%   \begin{block}{}
+%     \centering
+%     Los resultados son malos porque la distribución seleccionada es \textbf{simple e inadecuada}.
+%   \end{block}
+% \end{frame}
+
+% \subsection{Denoising Auto-encoders}
+
+% \begin{frame}[c]\frametitle{Denoising Auto-encoders}
+%   \begin{blockm}{Eliminar ruido}
+%     Además de la ya mencionada reducción de dimensión, los auto-encoders también son capaces de \textbf{restaurar datos dañados o con ruido}. 
+%   \end{blockm}
+%   En este caso particular podemos ignorar la estructura encoder/decoder, lo que nos dejaría con: $$h:\mathcal{X} \to \mathcal{X}$$\\
+%   Esta expresión hace referencia a un \textbf{denoising auto-encoder}.\\
+%   \vspace{.4cm}
+%   El objetivo es optimizar $h$ de tal forma que, cualquier perturbación $\tilde{\mathbf{x}}$ de la señal $\mathbf{x}$ sea restaurada a $\mathbf{x}$ de nuevo, por tanto $$h(\tilde{\mathbf{x}}) \approx \mathbf{x}.$$
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   Podemos ilustrar este comportamiento con datos en 2D, añadiendo ruido Gaussiano y utilizando la MSE:
+%   $$\hat{\theta}=\underset{\theta}{argmin}\frac{1}{N}\sum_{n=1}^{N} \left \| x_n - h(x_n+\epsilon_n; \theta) \right \|^{2}$$  
+%   donde $x_n$ son los datos originales y $\epsilon_n$ el ruido Gaussiano.
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   %\textbf{Conjunto de datos original {\color{red}$\mathbf{x}$}.}\\
+%   \begin{figure}
+%     \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/denoise_2d_a.pdf}\\    
+%     \caption{Conjunto de datos original {\color{red}$\mathbf{x}$}.}    
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   %\textbf{Datos con ruido adicional {\color{darkgreen}$\tilde{\mathbf{x}} = x+\epsilon$}.}\\
+%   \begin{figure}
+%     \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/denoise_2d_b.pdf}\\    
+%     \caption{Datos con ruido adicional {\color{darkgreen}$\tilde{\mathbf{x}} = x+\epsilon$}.}    
+%   \end{figure} 
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   %\textbf{Distribución aprendida por el denoising auto-encoder.}\\
+%   \begin{figure}
+%     \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/denoise_2d_c.pdf}\\    
+%     \caption{Distribución aprendida por el denoising auto-encoder.}    
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   %\textbf{Resultado $h(\tilde{\mathbf{x}})$ del decoder.}\\
+%   \begin{figure}
+%     \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/denoise_2d_d.pdf}\\    
+%     \caption{Resultado $h(\tilde{\mathbf{x}})$ del decoder.}    
+%   \end{figure}   
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo 2D}
+%   %\textbf{Resultado $h(\tilde{\mathbf{x}})$ del decoder.}\\
+%   \begin{figure}
+%     \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/denoise_2d_e.pdf}\\    
+%     \caption{Resultado $h(\tilde{\mathbf{x}})$ del decoder.}    
+%   \end{figure} 
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   Podemos hacer lo mismo con datos más complejos, por ejemplo el conjunto MNIST.\\
+%   \vspace{.4cm}
+%   \begin{block}{}
+%     Cuando trabajamos con imágenes, los tipos de \emph{ruido} que podemos aplicar son más variados.
+%   \end{block}
+%   \vspace{.4cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/denoise_mnist_corruptions.pdf}
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_or}\\
+%     \vspace{.2cm}
+%     Datos con el $50\%$ de los pixels eliminados.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_ns5}\\ 
+%     \vspace{.2cm}
+%     Datos reconstruidos.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_ns5_r}\\ 
+%   \end{center}    
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_or}\\
+%     \vspace{.2cm}
+%     Datos con el $90\%$ de los pixels eliminados.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_ns9}\\ 
+%     \vspace{.2cm}
+%     Datos reconstruidos.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_ns9_r}\\ 
+%   \end{center}    
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_or}\\
+%     \vspace{.2cm}
+%     Datos con desenfoque ($\sigma=4$).\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_br4}\\ 
+%     \vspace{.2cm}
+%     Datos reconstruidos.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_br4_r}\\ 
+%   \end{center}    
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \vspace{-.2cm}
+%   \begin{center}
+%     Datos originales.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_or}\\
+%     \vspace{.2cm}
+%     Datos con máscara de bloqueo de tamaño $16 \times 16$ pixels.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_mk16}\\ 
+%     \vspace{.2cm}
+%     Datos reconstruidos.\\
+%     \vspace{.2cm}
+%     \includegraphics[width=.35\textwidth, center]{imgs/tema4/aenc/denoise_mk16_r}\\ 
+%   \end{center}    
+% \end{frame}
+
+
+% \begin{frame}[t]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \begin{blockm}{Multiples soluciones}
+%     La distribución previa $p(\mathbf{x}|\tilde{\mathbf{x}})$ (probabilidad de obtener $\mathbf{x}$ dado $\tilde{\mathbf{x}}$), \textbf{puede ser multimodal}, es decir, puede tener \textbf{múltiples soluciones posibles}.
+%   \end{blockm}
+%   Si entrenamos un autoencoder utilizando MSE entonces la mejor reconstrucción que podemos esperar es el ``promedio'' de las posibles soluciones
+%   $$h(\tilde{\mathbf{x}}) = \mathbb{E}[\mathbf{x}|\tilde{\mathbf{x}}],$$
+%   lo que es improbable que coincida con $p(\mathbf{x}|\tilde{\mathbf{x}})$.
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Denoising Auto-encoders}\framesubtitle{Ejemplo MNIST}
+%   \includegraphics[width=.85\textwidth, center]{imgs/tema4/aenc/denoise_limits.pdf}\\ 
+% \end{frame}
+
+
+% \subsection{Inferencia variacional}
+
+% \begin{frame}[c]\frametitle{Inferencia variacional}\framesubtitle{Motivación}
+%     Como veíamos anteriormente (página \ref{frame:gen}), si intentamos \textbf{generar nuevos datos} en $\mathcal{X}$ a partir de unos puntos en $\mathcal{Z}$ asumiendo que siguen una distribución $q$, los resultados no son prometedores.\\
+%   \vspace{1cm}
+%   \begin{columns}
+%     \begin{column}{0.7\textwidth}
+%       \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/decoder_smp_d.pdf}\\
+%     \end{column}
+%     \begin{column}{0.3\textwidth}
+%       \includegraphics[width=.9\textwidth, center]{imgs/tema4/aenc/decoder_mnist_32.pdf}\\ 
+%     \end{column}
+%   \end{columns}
+%   \vspace{.4cm}
+
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Inferencia variacional}\framesubtitle{Motivación}
+%   \begin{block}{}
+%     Este problema proviene de la distribución $q$ seleccionada. Esta es \textbf{muy simple e inadecuada}, los datos en $\mathcal{Z}$ se comportan de manera diferente.
+%   \end{block}
+%   \vspace{.3cm}
+%   \includegraphics[width=.6\textwidth, center]{imgs/tema4/aenc/vae_motivation.pdf}\\ 
+%   \begin{block}{}
+%     El espacio latente tiene discontinuidades y al tomar una muestra en estas zonas intermedias el decoder produce salidas poco realistas.
+%   \end{block}
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}\framesubtitle{Motivación}
+%   \begin{blockm}{Imponer distribución}
+%     No conocemos la distribución en $\mathcal{Z}$ para poder generar ejemplos con sentido, pero podemos \textbf{forzar al auto-encoder para que aprenda una específica} durante el entrenamiento.
+%   \end{blockm}
+%   En vez de entrenar el auto-encoder y adivinar la distribución de $\mathcal{Z}$ vamos a:
+%   \begin{enumerate}
+%     \item Imponer una distribución para $\mathcal{Z}$.
+%     \item Entrenar el decoder $g$ de tal forma que $g(\mathcal{Z})$ coincida con los datos de entrenamiento.
+%   \end{enumerate}
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{block}{}
+%     Consideremos un modelo que relaciona un conjunto de variables observables $\mathbf{x} \in \mathcal{X}$ con un conjunto de variables latentes $\mathbf{z} \in \mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/vae_lvm.pdf}\\ 
+%   \vspace{.2cm}
+%   Asumimos que podemos generar datos en $\mathcal{X}$ siguiendo un proceso aleatorio controlado por las variables latentes $\mathbf{z}$.\\
+%   \vspace{.2cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/vae_z2x_a.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{block}{}
+%     Consideremos un modelo que relaciona un conjunto de variables observables $\mathbf{x} \in \mathcal{X}$ con un conjunto de variables latentes $\mathbf{z} \in \mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/vae_lvm.pdf}\\ 
+%   \vspace{.2cm}
+%   Asumimos que podemos generar datos en $\mathcal{X}$ siguiendo un proceso aleatorio controlado por las variables latentes $\mathbf{z}$.\\
+%   \vspace{.2cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/vae_z2x_b.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{block}{}
+%     Consideremos un modelo que relaciona un conjunto de variables observables $\mathbf{x} \in \mathcal{X}$ con un conjunto de variables latentes $\mathbf{z} \in \mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/vae_lvm.pdf}\\ 
+%   \vspace{.2cm}
+%   Asumimos que podemos generar datos en $\mathcal{X}$ siguiendo un proceso aleatorio controlado por las variables latentes $\mathbf{z}$.\\
+%   \vspace{.2cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/vae_z2x_c.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{block}{}
+%     Consideremos un modelo que relaciona un conjunto de variables observables $\mathbf{x} \in \mathcal{X}$ con un conjunto de variables latentes $\mathbf{z} \in \mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/vae_lvm.pdf}\\ 
+%   \vspace{.2cm}
+%   Asumimos que podemos generar datos en $\mathcal{X}$ siguiendo un proceso aleatorio controlado por las variables latentes $\mathbf{z}$.\\
+%   \vspace{.2cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/aenc/vae_z2x_d.pdf}\\ 
+% \end{frame}
+
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{block}{}
+%     Consideremos un modelo que relaciona un conjunto de variables observables $\mathbf{x} \in \mathcal{X}$ con un conjunto de variables latentes $\mathbf{z} \in \mathcal{Z}$.
+%   \end{block}
+%   \vspace{.2cm}
+%   \includegraphics[width=.5\textwidth, center]{imgs/tema4/aenc/vae_lvm.pdf}\\ 
+%   \vspace{.2cm}
+
+%   No conocemos $\mathbf{z}$ pero si $\mathbf{x}$, por lo que tratamos de resolver (probabilidad a posteriori):
+%   $$p(\mathbf{z}|\mathbf{x}) = \frac{p(\mathbf{x}|\mathbf{z}) p(\mathbf{z})}{p(\mathbf{x})}.$$
+
+%   Obtener $p(\mathbf{x})$ es un \textbf{problema intratable} especialmente en modelos complejos dado que requiere una integrar sobre todas las posibles combinaciones de variables latentes
+%   $$p(\mathbf{x}) = \int p(\mathbf{x}|\mathbf{z})p(\mathbf{z}) d\mathbf{z}.$$
+% \end{frame}
+
+% \begin{frame}[t]\frametitle{Inferencia variacional}
+%   \begin{blockm}{Inferencia variacional}
+%    Como no podemos resolver $p(\mathbf{z}|\mathbf{x})$ vamos a intentar aproximarlo mediante un problema de optimización.
+%   \end{blockm}
+
+%   \begin{itemize}
+%     \item Consideremos una familia de distribuciones $q_{v}(\mathbf{z}|\mathbf{x})$ que aproximan la probabilidad a posteriori $p(\mathbf{z}|\mathbf{x})$ donde $v$ es el índice de la familia de distribuciones.
+%     \item Los parámetros $v$ se aprenden para minimizar la \emph{Kullback Leibeler (KL) divergence} entre la aproximación $q_{v}(\mathbf{z}|\mathbf{x})$ y la probabilidad a posteriori $p(\mathbf{z}|\mathbf{x})$.
+%     \item Queremos resolver $\arg\min_\nu \text{KL}(q_\nu(\mathbf{z}|\mathbf{x}) || p(\mathbf{z}|\mathbf{x})).$
+%   \end{itemize}  
+
+%   \begin{block}{}
+%     En otras palabras, queremos minimizar la diferencia entre la distribución variacional $q_{v}(\mathbf{z}|\mathbf{x})$ y la verdadera distribución posterior $p(\mathbf{z}|\mathbf{x})$.
+%   \end{block}
+
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Inferencia variacional}
+%   Gráficamente:
+%   \vspace{.2cm}
+%   \includegraphics[width=.8\textwidth, center]{imgs/tema4/aenc/variational_inference.pdf}\\ 
+% \end{frame}
+
+
+% \subsection{Variational Auto-encoders}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}
+%   Un \textbf{variational auto-encoder} es un \emph{deep latent variable model} donde:
+%   \begin{itemize}
+%     \item La probabilidad a posteriori $q_\phi(\mathbf{z}|\mathbf{x})$ aproximada se parametriza con una \emph{red de inferencia} (o encoder) que toma como entrada $\mathbf{x}$ y predice los parámetros para la probabilidad aproximada a posteriori, es decir,
+%     $$
+%     \begin{aligned}
+%       \mu, \sigma &= \text{NN}_\phi(\mathbf{x}) \\
+%       q_\phi(\mathbf{z}|\mathbf{x}) &= \mathcal{N}(\mathbf{z}; \mu, \sigma^2\mathbf{I})
+%     \end{aligned}
+%     $$
+%     \item La probabilidad $p_\theta(\mathbf{x}|\mathbf{z})$ se parametriza con una \emph{red generativa} (o decoder) que toma como entrada $\mathbf{z}$ y predice los valores de la distribución de datos, es decir,
+%       $$
+%       \begin{aligned}
+%         \mu, \sigma &= \text{NN}_\theta(\mathbf{z}) \\
+%         p_\theta(\mathbf{x}|\mathbf{z}) &= \mathcal{N}(\mathbf{x}; \mu, \sigma^2\mathbf{I})
+%       \end{aligned}
+%       $$
+%     \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}
+%   \includegraphics[width=\textwidth, center]{imgs/tema4/aenc/vae_arch.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}
+%   % Mapear un punto a una distribución en dos sentidos, no un punto en un punto
+%   \includegraphics[width=\textwidth, center]{imgs/tema4/aenc/vae.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}
+%   \includegraphics[width=\textwidth, center]{imgs/tema4/aenc/vae_2.pdf}\\ 
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Ejemplo}
+%   Consideremos como datos $\mathbf{d}$ el conjunto MNIST:\\
+%   \vspace{.3cm}
+%   \includegraphics[width=.6\textwidth, center]{imgs/tema4/aenc/mnist.png}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Ejemplo}
+%   \begin{figure}
+%     \includegraphics[width=.95\textwidth, center]{imgs/tema4/aenc/vae-samples.png}
+%     \caption{(Kingma and Welling, 2013)}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Ejemplo}
+%   \begin{columns}
+%     \begin{column}{0.33\textwidth}
+%       \includegraphics[width=.85\textwidth, center]{imgs/tema4/aenc/z_aenc.pdf}
+%     \end{column}
+%     \begin{column}{0.33\textwidth}
+%       \includegraphics[width=.85\textwidth, center]{imgs/tema4/aenc/z_vaenc.pdf}
+%     \end{column}
+%     \begin{column}{0.33\textwidth}
+%       \includegraphics[width=.85\textwidth, center]{imgs/tema4/aenc/z_n01.pdf}
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Ejemplo}
+%   \begin{figure}
+%     \includegraphics[width=.55\textwidth, center]{imgs/tema4/aenc/vae-interpolation.png}
+%     \caption{(Kingma and Welling, 2013)}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Aplicaciones}
+%   \begin{figure}
+%     \includegraphics[width=.8\textwidth, center]{imgs/tema4/aenc/generative-compression.png}
+%     \caption{Compresión jerárquica de imágenes y otros datos, por ejemplo, en sistemas de videoconferencia (Gregor et al, 2016).}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Aplicaciones}
+%   \begin{figure}
+%     \includegraphics[width=.8\textwidth, center]{imgs/tema4/aenc/generative-factors.png}
+%     \caption{Comprender los factores de variación y las invarianzas (Higgins et al, 2017).}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Variational Auto-encoders}\framesubtitle{Aplicaciones}
+%   \begin{figure}
+%     \includegraphics[width=.65\textwidth, center]{imgs/tema4/aenc/vae-styletransfer.jpg}
+%     \caption{Transferencia de estilo de voz (van den Oord et al, 2017).}
+%   \end{figure}
+% \end{frame}
+
+\begin{frame}[t]{Referencias}
+  \begin{enumerate}
+    \item \href{https://glouppe.github.io/info8010-deep-learning/?p=lecture11.md}{\textbf{Lecture 11: Auto-encoders and variational auto-encoders}}
+    \item \href{https://fleuret.org/dlc/}{\textbf{Deep Learning Course}}
+    \item \href{https://www.jeremyjordan.me/variational-autoencoders/}{\textbf{Variational autoencoders}}
+
+  \end{enumerate}
+\end{frame}
+
+\end{document}

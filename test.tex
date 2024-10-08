@@ -1,0 +1,82 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 4.2: Aprendizaje no supervisado} 
+\subtitle{Redes genearativas adversarias}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+\begin{frame}[t]{Introducción}
+	\framesubtitle{Modelos generativos}
+	\textbf{Aprendizaje no supervisado}:\\
+	Extraer conocimiento de un conjunto de datos $x$ para el que no tenemos etiquetas $y$.\\
+	\vspace{.4cm}
+	\textbf{Tareas más comunes}:
+	\begin{itemize}
+		\item Clustering
+		\item Autoencoders
+		\item Modelos generativos
+	\end{itemize}
+	\vspace{.4cm}
+	\begin{block}{\textbf{Objetivo de los modelos generativos}}
+		Generar datos sintéticos pero realistas de alta dimensión $\mathbf{x} \sim p_{\theta}(\mathbf{x}),$ que se asemejen lo más posible a la distribución desconocida de datos $p(\mathbf{x})$.
+	\end{block}
+
+\end{frame}
+
+\end{document}

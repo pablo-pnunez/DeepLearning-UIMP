@@ -1,0 +1,447 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 3.1: Redes recurrentes}
+\subtitle{Fundamentos y arquitecturas}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+\begin{frame}{Introducción}
+  
+  \begin{blockm}{}
+    En la actualidad existen numerosas arquitecturas DNN creadas en función del problema que pretenden resolver.\\
+  \end{blockm}
+  Veremos en detalle las siguientes:
+  \begin{itemize}
+    \item Redes recurrentes
+    \item Transformers
+    \item Autoencoders
+	\item Redes generativas adversarias
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------
+\section{Redes neuronales recurrentes (RNN)}
+
+\begin{frame}{Introducción}
+  \begin{blockm}{¿Qué son?}
+    Redes neuronales profundas que incorporan capas con conexiones recurrentes.
+  \end{blockm}
+  Las conexiones recurrentes sirven para sacar partido de lo aprendido en instantes anteriores.
+  \vspace{1em}
+  \twoimages{imgs/tema4/rnn/DNN.pdf}{imgs/tema4/rnn/RNN.pdf}{0.55}
+\end{frame}
+
+\begin{frame}{Introducción}
+  \begin{blockm}{¿Para qué sirven?}
+    Son útiles en el tratamiento de información secuencial (texto, audio, video,...).
+  \end{blockm}
+  Ejemplos:
+  \begin{itemize}
+    \item Reconocimiento del habla
+    \item Análisis de sentimientos a partir de textos
+    \item Traducción automática
+    \item Reconocimiento de entidades
+    \item Generación de música
+    \item Análisis de secuencias de ADN
+    \item etc.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{RNN vs Feed Forward}
+  \begin{blockm}{\textbf{Ejemplo:} Predecir la palabra siguiente a partir del comienzo de una frase}
+    \textit{Entrada:} Secuencia de palabras de longitud variable.\\
+    \textit{Salida:} Palabra.
+  \end{blockm}
+  Otros datos:
+  \begin{itemize}
+    \item Cada palabra se codifica utilizando one-hot.
+    \item Una frase es una secuencia con número variable de vectores one-hot.
+    \item Supongamos:
+    \begin{itemize}
+      \item Vocabulario de 10000 palabras.
+      \item Longitud máxima de frase de 50 palabras.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Feed Forward vs RNN}
+  Mismo problema, arquitecturas diferentes:
+  \vspace{1em}
+  \twoimages{imgs/tema4/rnn/EX1.pdf}{imgs/tema4/rnn/EX2.pdf}{0.75}
+\end{frame}
+
+
+\begin{frame}{Notación}
+	Matrices de pesos:
+	\begin{itemize}
+	  \item $\mathbf{U}$: Conexiones entre capa de entrada y recurrente.
+	  \item $\mathbf{V}$: Conexiones de la capa recurrente con la siguiente capa.
+	  \item $\mathbf{W}$: Conexiones de la capa recurrente con ella misma.
+	  \item $\mathbf{b}_{h}, \mathbf{b}_{y}$: Bias de la capa recurrente y de la de salida.
+	\end{itemize}
+	\vspace{1em}
+	Funciones de activación:
+	\begin{itemize}
+	  \item $g_{1}$: Suele ser Tangente Hiperbólica o ReLU.
+	  \item $g_{2}$: Sigmoide (generalmente).
+	\end{itemize}
+  \end{frame}
+
+\begin{frame}{Notación}
+
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			Dimensiones:
+			\begin{itemize}
+			  \item $\mathbf{U}$: $3x5$
+			  \item $\mathbf{V}$: $2x3$
+			  \item $\mathbf{W}$: $3x3$
+			  \item $\mathbf{b}_{h}$: $3x1$
+			  \item $\mathbf{b}_{y}$: $2x1$
+			\end{itemize}
+			\vspace{1em}
+			Ecuaciones:
+			\begin{itemize}
+			  \item $\mathbf{h}^{(t)} = g_{1}(\mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}+\mathbf{b}_{h})$
+			  \item $\mathbf{\hat{y}}^{(t)} = g_{2}(\mathbf{Vh}^{(t)}+\mathbf{b}_{y})$
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.6\textwidth}
+			%Detalle de los elementos de una RNN:\\
+			\begin{center}
+				\includegraphics[width=\textwidth]{imgs/tema4/rnn/ECU.pdf}
+			\end{center}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}{Memoria en las RNN}
+
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Partiendo de:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = g_{1}(\mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}+\mathbf{b}_{h})$
+			\end{itemize}			
+			Para simplificar, eliminamos activación y bias:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = \mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}$
+			\end{itemize}
+			\vspace{1em}
+			Notación:
+			\begin{itemize}
+			  \item $\mathbf{x}^{(i)}$: Vector del i-ésimo elemento de la secuencia de entrada.
+			  \item $\mathbf{h}^{(i)}$: Salida de la capa recurrente debida a la entrada $\mathbf{x}^{(i)}$, es decir, en la etapa i-ésima.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			%Detalle de los elementos de una RNN:\\
+			\begin{center}
+				\includegraphics[width=.8\textwidth]{imgs/tema4/rnn/Memoria1.pdf}
+			\end{center}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}{Memoria en las RNN}
+
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Partiendo de:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = g_{1}(\mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}+\mathbf{b}_{h})$
+			\end{itemize}			
+			Para simplificar, eliminamos activación y bias:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = \mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}$
+			\end{itemize}
+			\vspace{1em}
+			Notación:
+			\begin{itemize}
+			  \item $\mathbf{x}^{(i)}$: Vector del i-ésimo elemento de la secuencia de entrada.
+			  \item $\mathbf{h}^{(i)}$: Salida de la capa recurrente debida a la entrada $\mathbf{x}^{(i)}$, es decir, en la etapa i-ésima.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			%Detalle de los elementos de una RNN:\\
+			\begin{center}
+				\includegraphics[width=.8\textwidth]{imgs/tema4/rnn/Memoria2.pdf}
+			\end{center}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}{Memoria en las RNN}
+
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Partiendo de:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = g_{1}(\mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}+\mathbf{b}_{h})$
+			\end{itemize}			
+			Para simplificar, eliminamos activación y bias:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = \mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}$
+			\end{itemize}
+			\vspace{1em}
+			Notación:
+			\begin{itemize}
+			  \item $\mathbf{x}^{(i)}$: Vector del i-ésimo elemento de la secuencia de entrada.
+			  \item $\mathbf{h}^{(i)}$: Salida de la capa recurrente debida a la entrada $\mathbf{x}^{(i)}$, es decir, en la etapa i-ésima.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			%Detalle de los elementos de una RNN:\\
+			\begin{center}
+				\includegraphics[width=.8\textwidth]{imgs/tema4/rnn/Memoria3.pdf}
+			\end{center}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}{Memoria en las RNN}
+
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Partiendo de:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = g_{1}(\mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}+\mathbf{b}_{h})$
+			\end{itemize}			
+			Para simplificar, eliminamos activación y bias:
+			\begin{itemize}
+				\item $\mathbf{h}^{(t)} = \mathbf{Wh}^{(t-1)}+\mathbf{Ux}^{(t)}$
+			\end{itemize}
+			\vspace{1em}
+			Notación:
+			\begin{itemize}
+			  \item $\mathbf{x}^{(i)}$: Vector del i-ésimo elemento de la secuencia de entrada.
+			  \item $\mathbf{h}^{(i)}$: Salida de la capa recurrente debida a la entrada $\mathbf{x}^{(i)}$, es decir, en la etapa i-ésima.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			%Detalle de los elementos de una RNN:\\
+			\begin{center}
+				\includegraphics[width=.8\textwidth]{imgs/tema4/rnn/Memoria4.pdf}
+			\end{center}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}[shrink=25]{Memoria en las RNN}
+	\begin{columns}
+		\begin{column}{0.6\textwidth}
+			{\color{darkred}
+			\begin{equation*}
+				\begin{aligned}
+					& \mathbf{h}^{(1)}=g_{1}\left(\mathbf{W h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right) \\
+					& \mathbf{h}^{(2)}=g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W} \mathbf{h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(2)}+\mathbf{b}_{h}\right) \\
+					& \mathbf{h}^{(3)}=g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(2)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(3)}+\mathbf{b}_{h}\right) \\
+					& \vdots \\
+					& \mathbf{h}^{(t)}=g_{1}\left(\mathbf{W h}^{(t-1)}+\mathbf{U} \mathbf{x}^{(t)}+\mathbf{b}_{h}\right) {\color{black} \Leftarrow \text{Salida de la capa recurrente.}}\\
+				\end{aligned}
+			\end{equation*}}
+
+			{\color{darkgreen}
+			\begin{equation*}
+				\begin{aligned}
+					& \mathbf{y}^{(1)}=g_{2}\left(\mathbf{V h}^{(1)}+\mathbf{b}_{y}\right)=g_{2}\left(\mathbf{V} \cdot g_{1}\left(\mathbf{W h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right)+\mathbf{b}_{y}\right) \\
+					& \mathbf{y}^{(2)}=g_{2}\left(\mathbf{V} \cdot g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W} \mathbf{h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(2)}+\mathbf{b}_{h}\right)+\mathbf{b}_{y}\right) \\
+					& \mathbf{y}^{(3)}=g_{2}\left(\mathbf{V} \cdot g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W}\left(g_{1}\left(\mathbf{W h}^{(0)}+\mathbf{U} \mathbf{x}^{(1)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(2)}+\mathbf{b}_{h}\right)\right)+\mathbf{U} \mathbf{x}^{(3)}+\mathbf{b}_{h}\right)+\mathbf{b}_{y}\right) \\
+					& \vdots \\	
+					& \mathbf{y}^{(t)}=g_{2}\left(\mathbf{V h}^{(t)}+\mathbf{b}_{y}\right) {\color{black} \Leftarrow \text{Salida de la red.}}
+				\end{aligned}
+			\end{equation*}}
+		
+		\end{column}
+
+		\begin{column}{0.4\textwidth}
+			\includegraphics[width=.4\textwidth, right]{imgs/tema4/rnn/MiniModel.pdf}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+
+\begin{frame}{Despliegue en una RNN}
+
+	Las mismas matrices $\mathbf{U}$, $\mathbf{V}$ y $\mathbf{W}$ se utilizan en distintas etapas de la secuencia de entrada:\\
+	\vspace{1em}
+	\begin{figure}
+		\includegraphics[width=.7\textwidth, center]{imgs/tema4/rnn/DESP1.pdf}
+		\label{key}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Entrenamiento de las RNN}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\textbf{Backpropagation through time (BPTT):} 
+			\begin{enumerate}
+				\item Se presenta una secuencia de etapas con su correspondiente entrada y salida deseada a la red.
+				\item Se desarrolla la red y se aplica la propagación hacia delante (etapa a etapa), luego se calculan y acumulan los errores de cada etapa.
+				\item Se actualizan los pesos en el sentido contrario al desarrollo de la red (como si se enrollase la red de nuevo).
+			\end{enumerate}
+
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=.9\textwidth]{imgs/tema4/rnn/TRAIN1.pdf}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+
+\begin{frame}[t]{Arquitecturas de ejemplo: 1 a N}
+	\textbf{Generación automática de música:} A partir de una nota de partida se genera una pieza musical, es decir, una secuencia más o menos larga de notas.\\
+	\vspace{.3cm}
+	\includegraphics[width=.55\textwidth, center]{imgs/tema4/rnn/M1N.pdf}
+\end{frame}
+
+\begin{frame}[t]{Arquitecturas de ejemplo: M a 1}
+	\textbf{Análisis de sentimientos:} A partir de un texto, predecir si la opinión que refleja es favorable (positiva) o desfavorable (negativa) con respecto a un ítem que se está evaluando.\\
+	\vspace{.3cm}
+	\includegraphics[width=.55\textwidth, center]{imgs/tema4/rnn/MM1.pdf}
+\end{frame}
+
+\begin{frame}[t]{Arquitecturas de ejemplo: M a N}
+	\textbf{Traducción automática:} A partir de un texto en un idioma, generar la versión traducida a otro idioma.\\
+	\vspace{.3cm}
+	\includegraphics[width=.9\textwidth, center]{imgs/tema4/rnn/MMN.pdf}
+\end{frame}
+
+\begin{frame}{Exploding/Vanishing Gradients}
+	En redes profundas, debido al gran número de productos encadenados, puede producirse los ya descritos:
+	\begin{itemize}
+		\item \textbf{Exploding gradients:} Crecimiento de gradientes tal que las oscilaciones durante el descenso de gradiente provocan que la red no converja.
+		\item \textbf{Vanishing gradients:} Los gradientes se hacen tan pequeños que el descenso apenas es apreciable y la red no aprende.
+	\end{itemize}
+	\begin{block}{}
+		\centering
+		¿Puede ser un problema en una red recurrente con una sola capa? $\rightarrow$ {\color{red}\textbf{SI}}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Exploding/Vanishing Gradients}
+	\begin{block}{}
+		\centering
+		Una secuencia de \textbf{n} elementos hace que la red se comporte como si tuviese \textbf{n} capas
+	\end{block}
+	\vspace{-1.5em}
+	\begin{equation*}
+		\scalebox{0.445}{ % Ajusta el factor de escala según tus necesidades
+		  $\mathbf{h}^{(10)}=g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[g_1\left(\mathbf{M}\left[h^{(0)}, \mathbf{x}^{(1)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(2)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(3)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(4)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(5)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(6)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(7)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(8)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(9)}\right]+\mathbf{b}_h\right), \mathbf{x}^{(10)}\right]+\mathbf{b}_h\right)$
+		}
+	\end{equation*}
+	\begin{columns}
+		\begin{column}{0.45\textwidth}
+			\includegraphics[width=.8\textwidth]{imgs/tema4/rnn/DESP1.pdf}
+		\end{column}
+
+		\begin{column}{0.55\textwidth}
+			Solución:
+			\begin{itemize}
+				\item \textbf{Exploding:} Estrategias de clipping.
+				\item \textbf{Vanishing:} Diseño de nuevos tipos de red:
+				\begin{itemize}
+					\item Redes GRU.
+					\item Redes LSTM.
+				\end{itemize}
+			\end{itemize}
+		\end{column}
+	\end{columns}
+
+\end{frame}
+
+\begin{frame}{Vanishing Gradients}
+	\begin{itemize}
+		\item En redes \textbf{feed forward} este efecto provoca variaciones mínimas en las primeras capas.
+		\item En las \textbf{redes recurrentes} implica que la influencia de los elementos de la secuencia de entrada se concentrará en el final de la secuencia.
+		\begin{itemize}
+			\item \textit{``La {\color{blue}bicicleta}, siendo la alternativa de transporte urbano más ecológica, {\color{blue}es} poco usada''}
+			\item \textit{``Las {\color{red}bicicletas}, siendo la alternativa de transporte urbano más ecológica, {\color{red}son} poco usadas''}
+		\end{itemize}
+	\end{itemize}
+
+	\begin{block}{}
+		\centering
+		Sería bueno que la red `recordase' que estamos hablando en {\color{blue}singular} o en {\color{red}plural}.
+	\end{block}
+
+\end{frame}
+
+\begin{frame}[t]{Referencias}
+	\begin{enumerate}
+	  \item \textbf{Redes recurrentes (GRU, LSTM y Bidireccionales), Oscar Luaces}
+	\end{enumerate}
+  \end{frame}
+
+\end{document}

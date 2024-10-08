@@ -1,0 +1,89 @@
+
+% Theme choice:
+\usetheme{Madrid}
+\usecolortheme{seagull}
+\useinnertheme{circles}
+
+\author{Pablo Pérez Núñez}
+ 
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{author}{}
+
+% Ajusta las dimensiones de la diapositiva
+
+\setbeamertemplate{blocks}[rounded][shadow=false]
+% \setbeamertemplate{blocks}[default]
+\definecolor{myblue}{RGB}{27, 122, 194}
+\definecolor{lightblue}{RGB}{55, 150, 225}
+\definecolor{lightbluetwo}{RGB}{164, 209, 242}
+
+\setbeamercolor{block title}{bg=lightblue,fg=white}
+\setbeamercolor{block body}{bg=lightbluetwo,fg=black}
+
+\setbeamercolor{title}{fg=white, bg =lightblue}
+\setbeamercolor{frametitle}{fg=white, bg = lightblue}
+
+\setbeamercolor*{palette secondary}{fg=white,bg=lightblue}
+
+\defbeamertemplate*{footline}{infolines}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex,left]{title in head/foot}%
+    \hspace*{2ex} \usebeamerfont{title in head/foot}\insertshorttitle \ - \insertsubtitle
+  \end{beamercolorbox}
+  % \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+  %   \usebeamerfont{date in head/foot}\hspace*{2em}
+  %   \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  %\end{beamercolorbox}
+  }%
+  \vskip0pt%
+}
+
+\setbeamertemplate{title page}{
+  \centering
+  % \usefonttheme{serif}
+  \begin{minipage}{0.95\textwidth} % Ajustar el ancho según sea necesario
+
+    \vspace{1em}
+    {\color{myblue}\rule{\linewidth}{2pt}\par}
+    \vspace{.5cm}
+    {\bfseries \huge \textcolor{myblue}{\inserttitle}\par }
+    \vspace{1em}
+    {\bfseries \LARGE \textcolor{myblue}{\insertsubtitle}\par }
+      
+    \vspace{2.5em}
+
+    \begin{columns}
+      \column{0.6\textwidth}
+      \vspace{6em}\\
+      {\bfseries \large \textcolor{myblue}{Aprendizaje profundo / Deep Learning}} \\
+      \vspace{1em}
+      {\textcolor{myblue}{\insertauthor}}
+      \column{0.4\textwidth}
+      \vfill
+      \centering
+      \includegraphics[height=4.5em]{imgs/LogoAEPIA.pdf} \\
+      \vspace{1em}
+      \includegraphics[height=2.5em]{imgs/UIMP.png}
+    \end{columns}
+
+    \vspace{1em}
+
+    {\color{myblue}\rule{\linewidth}{.5pt}\par}
+
+  \end{minipage}
+    
+
+  %  \usefonttheme{default}
+}
+
+% Define the template for section slides
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill
+    \LARGE\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+    \vfill
+  \end{frame}
+}

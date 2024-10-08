@@ -1,0 +1,445 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 3.4: Transformers}
+\subtitle{Arquitectura y aplicaciones}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+
+\subsection{Transformers: Arquitectura}
+
+\begin{frame}{Transformers}
+  
+  Una vez conocido el funcionamiento de los \textbf{mecanismos de atención}, podemos empezar a hablar del \textbf{Transformer}.\\
+  \vspace{.5cm}
+  \begin{block}{}
+    Presentado en 2017 por Vaswani et al. Fué diseñado para tareas de traducción (seq-2-seq), pero hoy en día es clave en la mayoría de tareas NLP.
+  \end{block}
+  \vspace{.5cm}
+  \textbf{El Transformer:}
+  \begin{itemize}
+    \item Es una arquitectura (conjunto de capas).
+    \item Utiliza mecanismos de self y cross-attention.
+    \item Es altamente paralelizable: permite entrenar modelos más grandes en menos tiempo.
+  \end{itemize}
+  % Un transformador no es sólo una capa de autoatención, es una arquitectura. No está muy claro qué se considera un transformador y qué no, pero aquí utilizaremos la siguiente definición:
+  % Cualquier arquitectura diseñada para procesar un conjunto conectado de unidades -como los tokens de una secuencia o los píxeles de una imagen- en la que la única interacción entre unidades se produce a través de la autoatención.
+  % Al igual que con otros mecanismos, como las convoluciones, ha surgido un enfoque más o menos estándar sobre cómo construir capas de autoatención en una red más grande. El primer paso es envolver la autoatención en un bloque que podamos repetir.
+\end{frame}
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El Transformer tradicional se compone de dos módulos:}
+      \begin{itemize}
+        \item Encoder
+        \item Decoder
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{Cada uno está formado por:}
+      \begin{itemize}
+        \item Capas self-attention.
+        \item Capas cross-attention.
+        \item Capas de normalización.
+        \item Perceptrones multicapa.
+        \item Conexiones residuales.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El encoder:}
+      \begin{itemize}
+        \item Recibe secuencia de entrada.
+        \item Genera secuencia codificada.
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{El decoder:}
+      \begin{itemize}
+        \item Recibe salida del encoder.
+        \item Recibe su salida anterior.
+        \begin{itemize}
+          \item Primero recibe \emph{$<start>$}.
+        \end{itemize}
+        \item Genera hasta \emph{$<end>$}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all_s1.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El encoder:}
+      \begin{itemize}
+        \item Recibe secuencia de entrada.
+        \item Genera secuencia codificada.
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{El decoder:}
+      \begin{itemize}
+        \item Recibe salida del encoder.
+        \item Recibe su salida anterior.
+        \begin{itemize}
+          \item Primero recibe \emph{$<start>$}.
+        \end{itemize}
+        \item Genera hasta \emph{$<end>$}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all_s2.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El encoder:}
+      \begin{itemize}
+        \item Recibe secuencia de entrada.
+        \item Genera secuencia codificada.
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{El decoder:}
+      \begin{itemize}
+        \item Recibe salida del encoder.
+        \item Recibe su salida anterior.
+        \begin{itemize}
+          \item Primero recibe \emph{$<start>$}.
+        \end{itemize}
+        \item Genera hasta \emph{$<end>$}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all_s3.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El encoder:}
+      \begin{itemize}
+        \item Recibe secuencia de entrada.
+        \item Genera secuencia codificada.
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{El decoder:}
+      \begin{itemize}
+        \item Recibe salida del encoder.
+        \item Recibe su salida anterior.
+        \begin{itemize}
+          \item Primero recibe \emph{$<start>$}.
+        \end{itemize}
+        \item Genera hasta \emph{$<end>$}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all_s4.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformers}
+  \begin{columns}
+    \begin{column}{.4\textwidth}
+      \textbf{El encoder:}
+      \begin{itemize}
+        \item Recibe secuencia de entrada.
+        \item Genera secuencia codificada.
+      \end{itemize}
+      \vspace{.5cm}
+      \textbf{El decoder:}
+      \begin{itemize}
+        \item Recibe salida del encoder.
+        \item Recibe su salida anterior.
+        \begin{itemize}
+          \item Primero recibe \emph{$<start>$}.
+        \end{itemize}
+        \item Genera hasta \emph{$<end>$}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \includegraphics[width=\textwidth, center]{imgs/tema4/att/Transformer_all_s5.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformers: Encoder}
+  El \textbf{encoder} de un Transformer se compone \textbf{6 módulos} concatenados.\\
+  \vspace{.5cm}
+  \textbf{Cada módulo contiene, por orden:}
+  \begin{enumerate}
+    \item Capa multi-head self-attention.
+    \item Conexión residual con entrada previa.
+    \item Capa de normalización.
+    \item Un MLP por cada elemento.
+    \item Conexión residual con entrada previa.
+    \item Capa de normalización.
+  \end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Transformers: Encoder}
+  En detalle:\\
+  \vspace{.5cm}
+  \includegraphics[width=.85\textwidth, center]{imgs/tema4/att/Transformer_enc.pdf}
+\end{frame}
+
+\begin{frame}{Transformers: Decoder}
+  El \textbf{decoder} de un Transformer se compone \textbf{6 módulos} concatenados.\\
+  \vspace{.5cm}
+  \textbf{Cada módulo contiene, por orden:}
+  \begin{enumerate}
+    \item Capa multi-head self-attention.
+    \item Conexión residual con entrada previa.
+    \item Capa de normalización.
+    \item Capa multi-head \textbf{cross-attention (con salida de encoder)}.
+    \item Conexión residual con entrada previa.
+    \item Capa de normalización.
+    \item Un MLP por cada elemento.
+    \item Conexión residual con entrada previa.
+    \item Capa de normalización.
+  \end{enumerate}\end{frame}
+
+\begin{frame}{Transformers: Decoder}
+  En detalle:\\
+  \vspace{.5cm}
+  \includegraphics[width=.85\textwidth, center]{imgs/tema4/att/Transformer_dec.pdf}
+\end{frame}
+
+\begin{frame}{Transformers vs RNN}
+  \begin{block}{}
+    \textbf{RNN:} Como ya habíamos visto, en tareas seq2seq condensan toda la información de la entrada en un único elemento. Esto se traduce en una \textbf{memoria corto-placista}.
+  \end{block}
+  \includegraphics[width=.55\textwidth, center]{imgs/tema4/att/ATT_vs_RNN.pdf}
+  
+  \begin{block}{}
+    \textbf{Transformers:} Aprovechan toda la secuencia de entrada para generar la salida.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Transformers vs RNN}
+  \begin{block}{}
+    \textbf{RNN:} Al depender un elemento del anterior, \textbf{no es posible paralelizar} su ejecución. Esto implica un menor rendimiento.
+  \end{block}
+
+  \includegraphics[width=.55\textwidth, center]{imgs/tema4/att/ATT_vs_RNN_2.pdf}
+  
+  \begin{block}{}
+    \textbf{Transformers:} Altamente paralelizables. Grandes modelos entrenados en menos tiempo.
+  \end{block}
+
+\end{frame}
+ 
+\begin{frame}{Transformers vs RNN}
+  \begin{block}{}
+    \textbf{RNN:} \textbf{Tienen} en cuenta el orden de los elementos de la secuencia de entrada.
+  \end{block}
+  \vspace{.5cm}
+  \textbf{Transformers:}
+  \begin{itemize}
+    \item \textbf{Tal como los hemos descrito hasta este punto}, no tienen en cuenta el orden.
+    \item Esto es una \textbf{desventaja}, el orden de los elementos es muy importante.
+    \item Necesitamos incorporar algo más: \textbf{Positional encoding}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Transformers: Positional encoding}
+  \textbf{Positional encoding:}
+  \begin{itemize}
+    \item Sumar un vector $\mathbf{t}_{i}$ a cada elemento $\mathbf{x}_{i}$ de la entrada.
+    \item Este vector ha de ser del mismo tamaño $k$ que $\mathbf{x}_{i}$.
+  \end{itemize}
+  \vspace{.3cm}
+  Los valores se obtienen:
+  $$
+  \begin{aligned}
+  \mathbf{t}_{i,2j} &= \sin\left(\frac{i}{10000^{\frac{2j}{k}}}\right) \\\\
+  \mathbf{t}_{i,2j+1} &= \cos\left(\frac{i}{10000^{\frac{2j}{k}}}\right).
+  \end{aligned}
+  $$
+  \vspace{.3cm}
+  \begin{block}{}
+    Como se puede ver, los elementos pares del vector se obtienen de forma diferente a los impares.    
+  \end{block}
+
+\end{frame}
+
+% \begin{frame}{Transformers: Positional encoding}
+%   Visualización de los vectores $\mathbf{t}_{i}$ en secuencias de tamaño máximo 50 con $k=128$:\\
+%   \vspace{.5cm}
+%   \includegraphics[width=.7\textwidth, center]{imgs/tema4/att/positional-encoding.png}
+% \end{frame}
+
+\begin{frame}{Transformers: Positional encoding}
+  Localización dentro del Transformer:\\
+  \vspace{.5cm}
+  \includegraphics[width=.7\textwidth, center]{imgs/tema4/att/positional_enc.pdf}
+\end{frame}
+
+\subsection{Transformers: Aplicaciones}
+
+\begin{frame}[t]{Transformers: Aplicaciones}
+  \begin{block}{}
+    Diseñados inicialmente para resolver problemas de traducción. En la actualidad se utilizan en muchas más tareas.
+  \end{block}
+
+  \textbf{Natural Language Processing:}
+  \begin{itemize}
+    \item Traducción
+    \item Clasificación
+    \item Conversación (chat)
+  \end{itemize}
+
+  \textbf{Imágenes:}
+  \begin{itemize}
+    \item Detección de objetos
+    \item Super-resolución
+  \end{itemize}
+
+  \textbf{Multimodal:}
+  \begin{itemize}
+    \item Vídeo y texto (por ejemplo, subtítulos automáticos para videos)
+    \item Generación de descripciones para imágenes (Image captioning)
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[t]{Transformers: Aplicaciones}
+  \begin{block}{}
+    En tareas NLP, gracias a la introducción de los Transformers los modelos de lenguaje han crecido en tamaño, precisión y complejidad.
+  \end{block}
+  \vspace{.2cm}
+  \includegraphics[width=.75\textwidth, center]{imgs/tema4/att/llm_graph.png}
+  \vspace{.2cm}
+  El modelo ELMo no utiliza transformers, está basado en LSTM bidireccionales.
+\end{frame}
+
+\begin{frame}[t]{Transformers: Aplicaciones}
+  \textbf{GPT-4 (Generative Pre-trained Transformer 4):}
+  \begin{itemize}
+    \item Creado por OpenAI.
+    \item Modelo de lenguaje con miles de millones de parámetros.
+    \item Utilizado en generación de texto coherente, traducción y chatbots avanzados.
+  \end{itemize}
+  \vspace{1cm}
+  \includegraphics[width=\textwidth, center]{imgs/tema4/att/chatgpt-3.pdf}
+
+\end{frame}
+
+\begin{frame}[t]{Transformers: Aplicaciones}
+  \textbf{CLIP (Contrastive Language-Image Pretraining):}
+  \begin{itemize}
+    \item Modelo creado por OpenAI que combina imágenes y texto utilizando transformers.
+    \item Capacidad para entender contenido visual y textual, útil en clasificación de imágenes y búsqueda basada en texto.
+  \end{itemize}
+  \vspace{.5cm}
+  \includegraphics[width=.75\textwidth, center]{imgs/tema4/att/clip.png}
+\end{frame}
+
+% \begin{frame}[t]{Transformers: Aplicaciones}
+%   \textbf{BERT (Bidirectional Encoder Representations from Transformers):}
+%   \begin{itemize}
+%     \item Creado por Google.
+%     \item Es bidireccional, teniendo en cuenta el contexto anterior y posterior de una palabra.
+%     \item Utilizado en tareas de procesamiento de lenguaje natural como clasificación, etiquetado de entidades y resolución de preguntas.
+%   \end{itemize}
+%   \vspace{.5cm}
+%   \includegraphics[width=.6\textwidth, center]{imgs/tema4/att/bert.jpg}
+% \end{frame}
+
+% \begin{frame}[t]{Transformers: Aplicaciones}
+%   \textbf{T5 (Text-to-Text Transfer Transformer):}
+%   \begin{itemize}
+%     \item Modelo de lenguaje de Google que sigue el enfoque ``texto a texto''.
+%     \item Capaz de realizar múltiples tareas de procesamiento de lenguaje natural, como traducción, resumen y generación de respuestas.
+%     \item Versátil y eficiente al unificar diferentes tareas bajo una sola arquitectura.
+%   \end{itemize}
+%   \vspace{.5cm}
+%   \includegraphics[width=.6\textwidth, center]{imgs/tema4/att/t5.jpg}
+% \end{frame}
+
+\begin{frame}[t]{Referencias}
+  \begin{enumerate}
+    \item \href{https://learningturtle.github.io/Blog/posts/attention_another_perspective_part2/}{\textbf{Attention? An Other Perspective!, Nikhil Shah}}\\
+    \item \href{https://glouppe.github.io/info8010-deep-learning/?p=lecture7.md}{\textbf{Lecture 7: Attention and transformers, Prof. Gilles Louppe}}\\  
+    \item \href{https://peterbloem.nl/blog/transformers}{\textbf{Transformers from scratch, Peter Bloem}}
+    \item \href{https://jalammar.github.io/illustrated-transformer/}{\textbf{The Illustrated Transformer}} \\
+  \end{enumerate}
+\end{frame}
+
+
+
+\end{document}

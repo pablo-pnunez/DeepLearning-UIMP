@@ -1,0 +1,254 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 3.2: Redes recurrentes}
+\subtitle{GRU, LSTM y Bidireccionales}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+
+\subsection{Gate Recurrent Unit (GRU)}
+
+\begin{frame}{Gate Recurrent Unit (GRU)}
+	\begin{blockm}{Definición}
+		Redes recurrentes con `gates' (puertas) que regulan el flujo de información que pasa de una etapa a la siguiente.
+	\end{blockm}
+	\begin{itemize}
+		\item \textbf{Regulación:} Transmitir desde cada neurona una salida ponderada entre su activación y la entrada recurrente.
+		\begin{itemize}
+			\item El factor de ponderación se aprende y suele ser en muchos casos próximo a 0 o a 1.
+		\end{itemize}
+		\item \textbf{Efecto memoria:} Puede ocurrir que entre la etapa $j$ y la etapa $k$ fluya la información de la etapa anterior, es decir, 
+				$\mathbf{h}_{\mathbf{i}}^{(j)} \simeq \mathbf{h}_{\mathbf{i}}^{(j+1)} \simeq \ldots \simeq \mathbf{h}_{\mathbf{i}}^{(k-2)} \simeq \mathbf{h}_{\mathbf{i}}^{(k-1)}$.	Esto provoca que la salida en la etapa $k$ dependa en gran medida de la etapa $j$, que puede ser muy anterior.
+	\end{itemize}
+	Intuitivamente, una red GRU puede permitir que las neuronas se especialicen en determinadas propiedades de la secuencia que están tratando para mejorar la predicción.
+\end{frame}
+
+\begin{frame}{RNN vs GRU}
+
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=.9\textwidth, center]{imgs/tema4/rnn/RNNsimple.pdf}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=.85\textwidth, center]{imgs/tema4/rnn/GRU.pdf}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{GRU con relevancia}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=.85\textwidth, center]{imgs/tema4/rnn/GRU.pdf}
+		\end{column}
+
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=.85\textwidth, center]{imgs/tema4/rnn/GRUrele.pdf}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Notación}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/GRUrele.pdf}
+		\end{column}
+
+		\begin{column}{0.6\textwidth}
+			\begin{equation*}
+				\begin{aligned}
+				& \boldsymbol{\Gamma}_{\mathrm{u}} = \sigma(\mathbf{M}_{u}[\mathbf{h}^{(t-1), \mathbf{x}^{(t)}}]+\mathbf{b}_{u})\\
+				& \boldsymbol{\Gamma}_{\mathrm{r}} = \sigma(\mathbf{M}_{r}[\mathbf{h}^{(t-1), \mathbf{x}^{(t)}}]+\mathbf{b}_{r})\\
+				& \boldsymbol{\hat{h}}^{(t)} = \text{tanh}(\mathbf{M}[\boldsymbol{\Gamma}_{\mathrm{r}}\odot\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}]+\mathbf{b}_{h}) \\
+				& \boldsymbol{h}^{(t)} = \boldsymbol{\Gamma}_{\mathrm{r}}\odot\mathbf{\hat{h}}^{(t)}+(1-\boldsymbol{\Gamma}_{\mathrm{u}}) \odot \mathbf{h}^{(t-1)} \\[5px]
+				& \text{donde:} \\[5px]
+				& \mathbf{M} = [\mathbf{W}, \mathbf{U}] \\
+				& \mathbf{M}_{r} = [\mathbf{W}_{r}, \mathbf{U}_{r}] \\
+				& \mathbf{M}_{u} = [\mathbf{W}_{u}, \mathbf{U}_{u}] \\
+				\end{aligned}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+\begin{frame}{Notación}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/GRUrele2.pdf}
+		\end{column}
+
+		\begin{column}{0.6\textwidth}
+			\includegraphics[width=.9\textwidth, center]{imgs/tema4/rnn/GRUrele2desp.pdf}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\subsection{Long Short Term Memory (LSTM)}
+
+
+\begin{frame}{Long Short Term Memory (LSTM)}
+
+	\begin{blockm}{Descripción}
+		Se presentaron antes que las GRU (Hochreiter y Schmidhuber, 1997). Más complejas y flexibles que las redes GRU ya que cuentan con varias `gates'.
+	\end{blockm}
+	
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			En las redes LSTM hay dos vectores de información que se pasan de una etapa a otra:
+
+			\begin{itemize}
+				\item $ \mathbf{h}^{(t)} $: Salida de la capa LSTM.
+				\item $ \mathbf{c}^{(t)} $: \textit{Estado} de la capa LSTM.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.6\textwidth}
+			\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/GRUsec.pdf}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Long Short Term Memory (LSTM)}
+
+	\begin{blockm}{Descripción}
+		Se presentaron antes que las GRU (Hochreiter y Schmidhuber, 1997). Más complejas y flexibles que las redes GRU ya que cuentan con varias `gates'.
+	\end{blockm}
+	
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			En las redes LSTM hay dos vectores de información que se pasan de una etapa a otra:
+
+			\begin{itemize}
+				\item $ \mathbf{h}^{(t)} $: Salida de la capa LSTM.
+				\item $ \mathbf{c}^{(t)} $: \textit{Estado} de la capa LSTM.
+			\end{itemize}
+		\end{column}
+
+		\begin{column}{0.6\textwidth}
+			\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/LSTMsec.pdf}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Notación}
+	\begin{columns}
+		\begin{column}{0.6\textwidth}
+			\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/LSTM.pdf}
+		\end{column}
+
+		\begin{column}{0.4\textwidth}
+			\begin{equation*}
+				\begin{aligned}
+				& \boldsymbol{\Gamma}_{\mathrm{u}} = \sigma(\mathbf{M}_{u}[\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}]+\mathbf{b}_{u})\\
+				& \boldsymbol{\Gamma}_{\mathrm{f}} = \sigma(\mathbf{M}_{f}[\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}]+\mathbf{b}_{f})\\
+				& \boldsymbol{\Gamma}_{\mathrm{o}} = \sigma(\mathbf{M}_{o}[\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}]+\mathbf{b}_{o})\\
+				& \boldsymbol{\hat{c}}^{(t)} = \text{tanh}(\mathbf{M}_{c}[\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}]+\mathbf{b}_{c}) \\
+				& \boldsymbol{c}^{(t)} = \boldsymbol{\Gamma}_{\mathrm{u}}\odot\boldsymbol{\hat{c}}^{(t)} + \boldsymbol{\Gamma}_{\mathrm{f}} \odot \boldsymbol{c}^{(t-1)} \\
+				& \boldsymbol{h}^{(t)} = \boldsymbol{\Gamma}_{\mathrm{o}}\odot\text{tanh}(\boldsymbol{c}^{(t)}) \\[5px]
+				& \text{donde:} \\[5px]
+				& \mathbf{M}_{u} = [\mathbf{W}_{u}, \mathbf{U}_{u}] \hspace{1em} \mathbf{M}_{f} = [\mathbf{W}_{f}, \mathbf{U}_{f}]\\
+				& \mathbf{M}_{o} = [\mathbf{W}_{o}, \mathbf{U}_{o}] \hspace{1em} \mathbf{M}_{c} = [\mathbf{W}_{c}, \mathbf{U}_{c}]\\
+				\end{aligned}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+\subsection{Bidireccionales}
+
+\begin{frame}{RNN Bidireccionales}
+
+	\begin{blockm}{Descripción}
+		Las redes bidireccionales (Schuster y Paliwal, 1997) tienen en cuenta el contexto \textbf{posterior} a un elemento en una secuencia.
+	\end{blockm}
+	
+	El contexto puede ser relevante:
+	\begin{itemize}
+		\item \textit{``Deberías ver {\color{blue}Roma}, {\color{teal}es una ciudad} con gran cantidad de monumentos''}
+		\item \textit{``Deberías ver {\color{red}Roma}, {\color{teal}es una película} de Alfonso Cuarón que te va a encantar''}
+	\end{itemize}
+	En este caso es necesario utilizar elementos posteriores a la palabra Roma para determinar de que estamos hablando.
+
+\end{frame}
+
+\begin{frame}{RNN Bidireccional (BRNN)}
+	Constituidas por:
+	\begin{itemize}
+		\item \textbf{Capa forward}: Celdas RNN que procesan la secuencia de inicio a fin.
+		\item \textbf{Capa backward}: Celdas que la procesan en orden inverso.
+	\end{itemize}
+	\vspace{1em}
+	\includegraphics[width=\textwidth, center]{imgs/tema4/rnn/RNNBidi mini.pdf}
+\end{frame}
+
+\begin{frame}{RNN Bidireccional (BRNN)}
+	Capas forward y backward en detalle:\\
+	\vspace{1em}
+	\includegraphics[width=.9\textwidth, center]{imgs/tema4/rnn/RNNBidi.pdf}
+\end{frame}
+
+\begin{frame}[t]{Referencias}
+	\begin{enumerate}
+	  \item \textbf{Redes recurrentes (GRU, LSTM y Bidireccionales), Oscar Luaces}
+	\end{enumerate}
+  \end{frame}
+
+\end{document}

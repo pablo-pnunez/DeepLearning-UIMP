@@ -1,0 +1,584 @@
+% Inbuilt themes in beamer
+
+\documentclass[aspectratio=169]{beamer}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+
+\definecolor{darkred}{RGB}{176, 31, 36}
+\definecolor{darkgreen}{RGB}{44, 95, 47}
+
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% Title page details: 
+\title{Tema 4.2: Aprendizaje no supervisado} 
+\subtitle{Redes genearativas adversarias}
+\input{template/template} 
+
+% MIS COSAS --------------------------------
+% Bloque con margen inferior
+\newenvironment{blockm}[1]{%
+  \begin{block}{\textbf{#1}}%
+  }{%
+  \end{block}%
+  \vspace{1em}%
+}
+% Dos imágenes
+\newcommand{\twoimages}[3]{%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#1}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=#3\textwidth]{#2}
+    \end{column}
+  \end{columns}
+}
+
+% Comando para mostrar el título de la subsección al inicio de cada nueva subsección
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \vfill
+    \small\insertsectionhead\par
+    {\color{myblue}\rule{\linewidth}{1pt}\par}
+	\LARGE\insertsubsectionhead\par
+    \vfill
+  \end{frame}
+}
+
+% ------------------------------------------
+
+\begin{document}
+
+% Title page frame
+\begin{frame}[plain]
+	\titlepage 
+\end{frame}
+
+\logo{}
+
+\begin{frame}[t]{Introducción}
+	\framesubtitle{Modelos generativos}
+	\textbf{Aprendizaje no supervisado}:\\
+	Extraer conocimiento de un conjunto de datos $x$ para el que no tenemos etiquetas $y$.\\
+	\vspace{.4cm}
+	\textbf{Tareas más comunes}:
+	\begin{itemize}
+		\item Clustering
+		\item Autoencoders
+		\item Modelos generativos
+	\end{itemize}
+	\vspace{.4cm}
+	\begin{block}{\textbf{Objetivo de los modelos generativos}}
+		Generar datos sintéticos pero realistas de alta dimensión $\mathbf{x} \sim p_{\theta}(\mathbf{x}),$ que se asemejen lo más posible a la distribución desconocida de datos $p(\mathbf{x})$.
+	\end{block}
+
+\end{frame}
+
+\section{Generative Adversarial Networks (GANs)}
+
+\begin{frame}[t]{Introducción}
+	\begin{block}{\textbf{Generative Adversarial Networks (GANs)}}
+		Las GANs son uno de los modelos de generación de datos de alta dimensión más populares. En ellas, \textbf{dos redes} se entrenan conjuntamente. Propuestas por Goodfellow et al. (2014).
+	\end{block}
+	\vspace{.5cm}
+	\textbf{Están compuestas de}:
+	\begin{itemize}
+		\item Un \textbf{discriminador} $\textbf{D}$ que clasifica ejemplos en `reales' y `falsos'.
+		\item Un \textbf{generador} $\textbf{G}$ para crear nuevos datos que `engañen' al discriminador.
+	\end{itemize}
+	\vspace{.5cm}
+	\begin{block}{}
+		Estas redes se denominan \textbf{adversarias} por que los objetivos de ambas redes son antagónicos.
+	\end{block}
+\end{frame}
+
+
+\begin{frame}{Introducción}
+	\textbf{Arquitectura:}\\
+	\vspace{.3cm}
+	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/arch.pdf}\\
+	\vspace{.3cm}
+	\begin{block}{}
+		\center \textbf{No existen dos $\textbf{D}$, el mismo discriminador evalúa ambos ejemplos.}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Introducción}
+	\textbf{Analogía:} Falsificador de billetes ($\textbf{G}$) y Policía ($\textbf{D}$)\\
+	\vspace{.3cm}
+	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/gan_ex1.pdf}\\
+	\vspace{.3cm}
+\end{frame}
+
+\begin{frame}{Introducción}
+	\textbf{Analogía:} Falsificador de billetes ($\textbf{G}$) y Policía ($\textbf{D}$)\\
+	\vspace{.3cm}
+	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/gan_ex2.pdf}\\
+	\vspace{.3cm}
+\end{frame}
+
+\begin{frame}{Introducción}
+	\textbf{Analogía:} Falsificador de billetes ($\textbf{G}$) y Policía ($\textbf{D}$)\\
+	\vspace{.3cm}
+	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/gan_ex3.pdf}\\
+	\vspace{.3cm}
+\end{frame}
+
+
+\begin{frame}{Introducción}
+	\textbf{Analogía:} Falsificador de billetes ($\textbf{G}$) y Policía ($\textbf{D}$)\\
+	\vspace{.3cm}
+	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/gan_ex4.pdf}\\
+	\vspace{.3cm}
+\end{frame}
+
+
+
+\begin{frame}[t]{Introducción}
+	\framesubtitle{Notación}	
+	Siendo $\mathcal{X}$ el espacio de los datos de entrada, y $d$ la dimensión del espacio latente.\\
+	\vspace{.5cm}
+	\textbf{Red generadora $\textbf{G}:\mathbb{R}^{d} \to \mathcal{X}$}:
+	\begin{itemize}
+		\item Mapea desde el espacio latente $\mathbb{R}^{d}$ al espacio de los datos de entrada $\mathcal{X}$.
+		\item Entrenada para que, dado un ruido Gaussiano $\mathbf z\in\mathbb R^d$, produzca una muestra que siga la distribución de los datos de entrada.
+	\end{itemize}
+	\vspace{.5cm}
+	\textbf{Red discriminadora $\textbf{D}:\mathcal{X} \to [0,1]$}:
+	\begin{itemize}
+		\item Entrenada para \textbf{clasificar} si un ejemplo proviene del conjunto real o del generador $\textbf{G}.$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Introducción}
+\framesubtitle{Notación}	
+	Dado un conjunto de puntos `reales' $$X=\{x_1,\ldots, x_n\}$$
+	si consideramos $\textbf{G}$ fijo, podemos entrenar $\textbf{D}$ generando ejemplos `falsos' $$X'=\{x'_1,\ldots, x'_n\}$$
+	mediante $\mathbf x'=\textbf{G}(\mathbf z)$. Esto resultará en un conjunto de datos de clasificación binaria $$\mathfrak{D}=\{ {\underbrace{(x_1,1), \dots, (x_N,1)}_{\text{Ejemplos reales}}}, {\underbrace{(\textbf{G}(z_1),0), \dots, (\textbf{G}(z_N),0)}_{\text{Ejemplos generados}}}\} $$
+	donde $\mathbf z \sim \mathcal{N} (0, 1)$.
+
+\end{frame}
+
+% \begin{frame}[t]{Introducción}
+% \framesubtitle{Notación}	
+% 	Dado un conjunto de puntos `reales' $$\mathbf{x} \sim q(\mathbf{x};\theta)$$
+% 	si consideramos $\textbf{G}$ fijo, podemos entrenar $\textbf{D}$ generando ejemplos `falsos' $$\mathbf{z} \sim p(\mathbf{z})$$
+% 	creando un conjunto de datos de clasificación binaria $$\mathfrak{D}=\{ {\underbrace{(x_1,1), \dots, (x_N,1)}_{\text{Ejemplos reales}}}, {\underbrace{(\textbf{G}(z_1),0), \dots, (\textbf{G}(z_N),0)}_{\text{Ejemplos generados}}}\} $$
+% 	donde $q(\mathbf{x};\theta)$ es la distribución de los datos reales y $p(\mathbf{z})$ es la distribución de $\textbf{G}(Z)$ y $Z \sim \mathcal{N}(0,1)$.
+% 	% Distribución de los datos reales, distribución de los datos generados por el generador G y distribución que se utiliza para generar la entrada aleatoria Z para el generador G
+% \end{frame}
+
+% \begin{frame}[t]{Entrenar discriminador}
+% 	\begin{block}{}
+% 		Resuelve un problema de clasificación binaria, por tanto necesita minimizar la función de pérdida \textbf{Binary Cross Entropy (BCE)}.
+% 	\end{block}
+% 	\vspace{.5cm}
+% 	$$ \min_{\mathbf{D}} \{ - y \log \mathbf{D}(\mathbf x) - (1-y)\log(1-\mathbf{D}(\mathbf x)) \} $$
+% 	% $$ \mathcal{L}(\mathbf{D})= - \frac{1}{2N} \left(\sum_{n=1}^{N} log(\mathbf{D}(x_n)) + \sum_{n=1}^{N} log(1 - \mathbf{D}(x_n))\right) $$ 
+% 	Donde $\mathbf{D}(x)$ es la predicción del discriminador resultado de haber aplicado previamente una función \textbf{sigmoide} $$D(\mathbf x) = \frac{1}{(1+e^{-o})}$$ a la salida $o\in\mathbb R$ de la última capa del modelo.
+% \end{frame}
+
+
+% \begin{frame}[t]{Entrenar generador}
+% 	Para generar cada uno de los ejemplos falsos:
+% 	\begin{itemize}
+% 		\item Primero obtiene $\mathbf z\in\mathbb R^d$ números aleatorios\footnote{Tradicionalmente llamamos a $\mathbf z$ variable latente y a $\mathbb R^d$ espacio latente.}, típicamente de una normal $\mathbf z \sim \mathcal{N} (0, 1)$.\\
+% 		\item Aplica el generador a los valores resultantes del paso anterior $\mathbf x'=G(\mathbf z)$ .
+% 	\end{itemize}
+% 	\vspace{.2cm}
+% 	\begin{block}{}
+% 		El objetivo del generador es \textbf{engañar al discriminador} para que clasifique $\mathbf x$ como datos reales, es decir, queremos que $D( G(\mathbf z)) \approx 1$.
+% 	\end{block}
+% 	\vspace{.2cm}
+% 	En otras palabras, para un discriminador $\textbf{D}$ dado tenemos que actualizar los pesos del generador $\textbf{G}$ para \textbf{maximizar} la cross-entropy cuando $y=0$ (ejemplo falso):
+% 	$$ \max_{\mathbf{G}} \{ - \log(1-\mathbf{D}(\mathbf{G}(\mathbf z))) \} $$
+% \end{frame}
+
+% \begin{frame}[t]{Minimax Loss}
+% 	Podemos transformar la maximización previa en una minimización forzando al modelo para que prediga $y=1$ en los casos generados, lo que resulta en:
+% 	$$\min_{\mathbf{G}} \{ - \log(\mathbf{D}(\mathbf{G}(\mathbf z))) \}$$
+% 	% Si el generador hace un trabajo perfecto, entonces $\mathbf{D}(\mathbf x')\approx 1$, por tanto la loss 
+% 	% $$ \max_{\mathbf{G}} \{ - \log(1-\mathbf{D}(\mathbf{G}(\mathbf z))) \} $$
+% 	% estará cercana a cero. Esto dificultará el aprendizaje del discriminador, por lo que se suele minimizar la siguiente loss: 
+% 	% $$\min_{\mathbf{G}} \{ - \log(\mathbf{D}(\mathbf{G}(\mathbf z))) \}$$
+% 	% que simplemente es alimentar con $\mathbf x'=G(\mathbf z)$ al discriminador pero dándole la etiqueta $y=1$.\\
+% 	En resumen, $\mathbf{D}$ y $\mathbf{G}$ están jugando un juego \emph{minimax} con la función objetivo: 
+% 	$$\min_{\mathbf{D}} \max_{\mathbf{G}} \{ -E_{x \sim \textrm{Data}} \log \mathbf{D}(\mathbf x) - E_{z \sim \textrm{Noise}} \log(1 - \mathbf{D}(\mathbf{G}(\mathbf z))) \}$$
+% \end{frame}
+
+\begin{frame}[t]{Entrenamiento}
+
+	\begin{block}{}
+		Lo más importante en una GAN es su proceso de entrenamiento. Cada batch o step se divide en dos pasos diferentes.
+	\end{block}
+	\vspace{.3cm}
+	Para cada batch:
+	\begin{enumerate}
+		\item Optimizar el discriminador.
+		\begin{itemize}
+			\item Congelamos los pesos del generador.
+			\item Actualizamos los pesos del discriminador para minimizar la BCE.
+		\end{itemize}
+		\item Optimizar el generador.
+		\begin{itemize}
+			\item Congelamos los pesos del discriminador.
+			\item Actualizamos los pesos del generador buscando engañar al discriminador.
+		\end{itemize}
+	\end{enumerate}
+	\vspace{.3cm}
+	\begin{block}{}
+		\center Este tipo de optimización se conoce como \emph{Alternating Stochastic Gradient Descent}.
+	\end{block}
+	
+\end{frame}
+
+\begin{frame}[t]{Entrenamiento}
+	\textbf{Paso 1:} Optimizar el discriminador:\\
+	\begin{enumerate}
+		\item Obtenemos las muestras reales del conjunto de datos $X=\{x_1,\ldots, x_n\}$.
+		\item Creamos $n$ números aleatorios $\mathbf z\in\mathbb R^d$ a partir de $\mathbf z \sim \mathcal{N} (0, 1)$.
+		\item Con $\mathbf{G}$ congelado, generamos las muestras $X'=\{x'_1,\ldots, x'_n\}$ aplicando $\mathbf{G}()$ a cada $\mathbf z$.
+		\item Optimizamos el discriminador mediante la Binary Cross Entropy:
+		\begin{itemize}
+			\item Primero obtenemos la loss para las muestras reales buscando predecir un 1. 
+			$$BCE(y=1) = -\log(\mathbf{D}(\mathbf x))$$
+			\item A continuación, lo mismo para las muestras generadas pero buscando predecir un 0. 
+			$$BCE(y=0) = -\log(1-\mathbf{D}(\mathbf{G}(\mathbf z)))$$
+			\item Optimizamos utilizando $BCE(y=1)+BCE(y=0)$.
+		\end{itemize}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Entrenamiento}
+	\textbf{Paso 1:} Optimizar el discriminador:\\
+	\vspace{.5cm}
+	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/train_step1.pdf}\\
+\end{frame}
+
+\begin{frame}[t]{Entrenamiento}
+	\textbf{Paso 2:} Optimizar el generador:\\
+	\begin{enumerate}
+		\item Generamos las muestras $X'=\{x'_1,\ldots, x'_n\}$ mediante $\mathbf{G}(\mathbf z)$.
+		\item Con $\mathbf{D}$ congelado, optimizamos el generador mediante la Binary Cross Entropy:
+		\begin{itemize}
+			\item Obtenemos la loss para las muestras generadas \textbf{buscando predecir un 1}. 
+			$$BCE(y=1) = -\log(\mathbf{D}(\mathbf{G}(\mathbf z)))$$
+			\item Optimizamos $\mathbf{G}$ utilizando la loss calculada.
+		\end{itemize}
+	\end{enumerate}
+	\vspace{.5cm}
+	\begin{block}{Engañar al discriminador}
+		Al dar ejemplos falsos y entrenar el generador para que sea capaz de generar 1, el generador aprende a engañar al discriminador.
+	\end{block}
+
+\end{frame}
+
+\begin{frame}[t]{Entrenamiento}
+	\textbf{Paso 2:} Optimizar el generador:\\
+	\vspace{.5cm}
+	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/train_step2.pdf}\\
+\end{frame}
+
+
+% \begin{frame}{Ejemplos}
+% 	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/ex_2d_1.pdf}\\
+% \end{frame}
+
+\begin{frame}{Ejemplos}
+	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/ex_2d_2.pdf}\\
+\end{frame}
+
+% \begin{frame}{Ejemplos}
+% 	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/ex_2d_3.pdf}\\
+% \end{frame}
+
+% \begin{frame}{Ejemplos}
+% 	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/ex_2d_4.pdf}\\
+% \end{frame}
+
+\begin{frame}{Ejemplos}
+	\begin{block}{Generación de imágenes}
+		Figura del artículo original de Goodfellow et al., 2014 donde se presentaron las GANs. Todas son generadas salvo las de borde amarillo, que son las de entrenamiento más próximas.
+	\end{block}
+	\vspace{.2cm}
+	\includegraphics[width=.47\textwidth, center]{imgs/tema4/gan/gan-gallery.png}\\
+\end{frame}
+
+% \begin{frame}{Ejemplos}
+% 	Imágenes de habitaciones generadas por una GAN tras la primera época de entrenamiento.\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/bedrooms1.png}\\
+% \end{frame}
+
+% \begin{frame}{Ejemplos}
+% 	Imágenes de habitaciones generadas por una GAN tras la quinta época de entrenamiento.\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.67\textwidth, center]{imgs/tema4/gan/bedrooms2.png}\\
+% \end{frame}
+
+\begin{frame}[t]{Problemas de las GANs}
+	Entrenar una red GAN tradicional puede tener los siguientes problemas:\\
+	\begin{itemize}
+		\item \textbf{Oscilaciones sin convergencia:} A diferencia de la minimización de loss estándar, el Alternating Stochastic Gradient Descent no tiene garantía de convergencia.
+		\item \textbf{Desvanecimiento de gradientes:} Cuando el discriminador es demasiado bueno, puede que el generador no sea capaz de aprender.
+		\item \textbf{Colapso de modo:} El generador puede dejar de generar diversidad en las muestras y producir siempre el mismo tipo de ejemplos.
+		\item \textbf{Evaluación del rendimiento:} La evaluación del rendimiento de una GAN es difícil en la práctica. ¿Cómo de buena es una imagen generada? ¿Con quién la comparamos?.
+		\item \textbf{Control de la generación:} Al generar a partir de ruido $\mathbf{z}$, ¿Cómo puedo generar ejemplos de una clase concreta?
+
+	\end{itemize}
+\end{frame}
+
+
+% \subsection{GANs condicionales (cGANs)}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\begin{block}{Control de la generación}
+% 		Los modelos que hemos visto hasta ahora nos permiten generar nuevas muestras a partir de un vector de ruido, pero no permiten controlar la generación.
+% 	\end{block}
+% 	\vspace{.3cm}
+% 	Muchas aplicaciones requieren de una generación condicionada:
+% 	\begin{itemize}
+% 		\item Predicción del siguiente fotograma en un video.
+% 		\item Rellenar partes faltantes o dañadas de una imagen.
+% 		\item Transferencia del estilo artístico de una imagen a otra.
+% 	\end{itemize}
+% \end{frame}
+
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\begin{block}{The Conditional GAN}
+% 		Este modelo propuesto por Mirza y Osindero en 2014 añade la capacidad de generación condicionada a las GANs tradicionales. 
+% 	\end{block}
+% 	\vspace{.3cm}
+% 	Para ello, parametriza $\mathbf{G}$ y $\mathbf{D}$ con un valor condicionante $\mathbf y$:
+% 	$$\min_{\mathbf{D}} \max_{\mathbf{G}} \{ -E_{x, y \sim \textrm{Data}} \log \mathbf{D}(\mathbf x, \mathbf y) - E_{z \sim \textrm{Noise},y \sim \textrm{Data}} \log(1 - \mathbf{D}(\mathbf{G}(\mathbf z, \mathbf y), \mathbf y)) \}$$
+
+% \end{frame}
+
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{The Conditional GAN}
+% 	\textbf{Ejemplo MNIST:}\\
+% 	\vspace{.3cm}
+% 	Queremos ser capaces de generar imágenes de un dígito concreto:
+% 	\begin{itemize}
+% 		\item La $\mathbf y$ sería un vector One-Hot con la clase correspondiente al dígito.
+% 		\item Tenemos que introducirlo tanto en el generador como en el discriminador.
+% 	\end{itemize}
+% 	\vspace{.3cm}
+% 	\begin{block}{}
+% 		\center \textbf{En este caso, como necesitamos datos etiquetados estamos ante un problema de aprendizaje supervisado.}
+% 	\end{block}
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{The Conditional GAN}
+% 	\textbf{Ejemplo MNIST:}\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/cGAN_g.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{The Conditional GAN}
+% 	\textbf{Ejemplo MNIST:}\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/cGAN_d.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{The Conditional GAN}
+% 	\textbf{Ejemplo MNIST:}\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/cGAN.pdf}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{The Conditional GAN}
+% 	\textbf{Ejemplo MNIST:}\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.65\textwidth, center]{imgs/tema4/gan/cGAN_MNIST.png}\\
+% 	\vspace{.3cm}
+% 	Cada fila está condicionada a una clase y en cada columna a un vector de ruido diferente.
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\begin{block}{Image to image}
+% 		Existen otro tipo de problemas donde queremos generar una imagen a partir de otra dada. Isola et al. presentaron en 2016 un método de resolver estos problemas denominado \emph{pix2pix}.
+% 	\end{block}
+% 	\vspace{.5cm}
+% 	En concreto, evaluaban su método en las siguientes tareas:
+% 	\begin{itemize}
+% 		\item Bordes a imágenes.
+% 		\item Segmentación semántica.
+% 		\item Coloreado de imágenes.
+% 		\item Dia a noche.
+% 	\end{itemize}
+
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	En este caso, proponen dos arquitecturas para $\mathbf{G}$:\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.5\textwidth, center]{imgs/tema4/gan/pix2pix_g.png}\\
+% 	\vspace{.3cm}
+% 	\begin{block}{Nota}
+% 		$\mathbf{G}$ solo recibe un elemento (la imagen de origen) y la aleatoriedad proviene de un DropOut.\\
+% 		En este caso denominan $y$ a la imagen generada y no $x$ como en artículos previos. 
+% 	\end{block}
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	El discriminador $\mathbf{D}$ es una red convolucional denominada \emph{PatchGAN}.\\
+% 	\begin{block}{}
+% 		En lugar de clasificar una imagen completa como real o falsa, clasifica varios parches de tamaño $NxN$ de la imagen de forma independiente y luego promedia las predicciones.
+% 	\end{block}
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.85\textwidth, center]{imgs/tema4/gan/pix2pix_patch.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	\textbf{Ejemplos:}\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.85\textwidth, center]{imgs/tema4/gan/pix2pix.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	El problema principal de esta técnica es que requiere pares de ejemplos con correspondencias pixel a pixel.\\
+% 	\vspace{.3cm}
+% 	\begin{block}{Diferentes dominios}
+% 		En ciertos casos casos tenemos ejemplos de diferentes dominios y queremos ser capaces de traducir entre ellos. Tengo una foto de manzanas y quiero cambiarlas por naranjas.
+% 	\end{block}
+% 	\vspace{.3cm}
+% 	\begin{block}{CycleGAN}
+% 		En 2017, Zhu et al. presentaron un método capaz de solventar este problema. En el proponen aprender \textbf{dos generadores}.
+% 	\end{block}
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	\textbf{Funcionamiento:}\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.85\textwidth, center]{imgs/tema4/gan/cyclegan_explain.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	\textbf{Ejemplos:}\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/cyclegan_ex1.jpeg}\\
+% \end{frame}
+
+% \begin{frame}[t]{GANs condicionales}
+% 	\framesubtitle{Image to image}
+% 	\textbf{Ejemplos:}\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.78\textwidth, center]{imgs/tema4/gan/cyclegan_ex2.jpeg}\\
+% \end{frame}
+
+% \subsection{Otras arquitecturas y aplicaciones}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\framesubtitle{Introducción}
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.45\textwidth, center]{imgs/tema4/gan/timeline.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{Progressive growing of GANs:}\\
+% 	\vspace{.7cm}
+% 	\includegraphics[width=.78\textwidth, center]{imgs/tema4/gan/progressive-gan.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{Progressive growing of GANs:}\\
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.6\textwidth, center]{imgs/tema4/gan/progressive-gan2.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{BigGANs:}\\
+% 	\vspace{.3cm}
+% 	Buscan generar imágenes de alta resolución y fidelidad mediante:
+% 	\begin{itemize}
+% 		\item Mecanismos de atención.
+% 		\item Hinge Loss.
+% 		\item Class-conditional Batch Normalization.
+% 		\item Etc.
+% 	\end{itemize}
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.75\textwidth, center]{imgs/tema4/gan/biggan.png}\\
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{StyleGAN (v1):}\\
+% 	\vspace{.3cm}
+% 	\begin{columns}[T]
+% 		\begin{column}{0.6\textwidth}
+% 			\begin{itemize}
+% 				\item Generador capaz de separar (automáticamente) diferentes aspectos de una imagen.
+% 				\item Se basa en la idea de las Progressive Growing GANs: 
+% 				\item Cada aspecto se denomina estilo: 
+% 				\begin{itemize}
+% 					\item Estilos más genéricos en las resoluciones más bajas.
+% 					\item Detalles más finos en las resoluciones más altas
+% 				\end{itemize}
+% 			\end{itemize}
+
+% 		\end{column}
+% 		\begin{column}{0.4\textwidth}
+% 			\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/stylegan.png}\\
+% 		\end{column}
+% 	\end{columns}
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{StyleGAN (v1):}\\
+% 	\vspace{.5cm}
+% 	\includegraphics[width=.85\textwidth, center]{imgs/tema4/gan/stylegan_inter.png}\\
+% 	% \centering
+% 	% \animategraphics[loop,autoplay,width=.7\textwidth]{10}{imgs/tema4/gan/styleGAN/ezgif-frame-}{001}{100}
+% \end{frame}
+
+% \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% 	\textbf{Few-Shot Adversarial Learning of Realistic Neural Talking Head Models:}\\
+% 	\vspace{.3cm}
+% 	Origen de los \emph{DeepFakes}:
+% 	\begin{itemize}
+% 		\item Requiere de una imagen de referencia y otra objetivo.
+% 		\item Crea una versión de la imagen referencia con la pose de la imagen objetivo.
+% 		\item Ambas imágenes pueden ser de diferentes dominios.
+% 	\end{itemize}
+% 	\vspace{.3cm}
+% 	\includegraphics[width=.9\textwidth, center]{imgs/tema4/gan/portrait_2.png}\\
+% \end{frame}
+
+% % \begin{frame}[t]{Otras arquitecturas y aplicaciones}
+% % 	\textbf{Few-Shot Adversarial Learning of Realistic Neural Talking Head Models:}\\
+% % 	\vspace{.3cm}
+% % 	\centering
+% % 	\includegraphics[width=.65\textwidth, center]{imgs/tema4/gan/portrait.png}\\
+% % \end{frame}
+
+
+\begin{frame}[t]{Referencias}
+\begin{enumerate}
+	\item \href{https://glouppe.github.io/info8010-deep-learning/?p=archives-lecture-gan.md}{\textbf{Generative Adversarial Networks, Gilles Louppe}}
+	\item \href{https://fleuret.org/dlc/materials/dlc-slides-11-1-GAN.pdf}{\textbf{Generative Adversarial Networks, François Fleuret}}
+	\item \href{https://d2l.ai/chapter_generative-adversarial-networks/gan.html}{\textbf{Generative Adversarial Networks, Dive into DL}}
+	\item \href{https://arxiv.org/pdf/1411.1784.pdf}{\textbf{Conditional Generative Adversarial Nets}}
+	\item \href{https://arxiv.org/pdf/1611.07004.pdf}{\textbf{Image-to-Image Translation with Conditional Adversarial Networks}}
+	\item \href{https://arxiv.org/pdf/1703.10593.pdf}{\textbf{Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks}}
+\end{enumerate}
+\end{frame}
+
+
+\end{document}
